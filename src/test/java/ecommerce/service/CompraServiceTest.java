@@ -1,21 +1,33 @@
 package ecommerce.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
-import ecommerce.entity.CarrinhoDeCompras;
-import ecommerce.entity.ItemCompra;
+import ecommerce.dto.CompraDTO;
+import ecommerce.dto.DisponibilidadeDTO;
+import ecommerce.dto.EstoqueBaixaDTO;
+import ecommerce.dto.PagamentoDTO;
 import ecommerce.entity.Regiao;
 import ecommerce.entity.TipoCliente;
 
-public class CompraServiceTest
-{
+class CompraServiceTest extends CompraServiceBaseTest{
+	/* 
 	@Test
 	public void calcularCustoTotal()
 	{
@@ -48,4 +60,29 @@ public class CompraServiceTest
 		// e não precisa instanciar um BigDecimal para fazer a comparação
 		assertThat(custoTotal).as("Custo Total da Compra").isEqualByComparingTo("0.0");
 	}
+	*/
+	@Test
+    @DisplayName("Deve retornar zero se o carrinho estiver vazio")
+    void calcularCustoTotal_CarrinhoVazio() {
+		carrinhoPadrao.setItens(Collections.emptyList());
+
+		BigDecimal total = compraService.calcularCustoTotal(carrinhoPadrao, Regiao.SUL, TipoCliente.OURO);
+
+		assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
+	}
+
+	@Test
+    @DisplayName("Desconto 10% (> 500 e < 1000) e Frete Faixa B (> 5kg e <= 10kg)")
+    void calcularCustoTotal_Desconto10_FreteFaixaB() {
+        // Subtotal 600 - 10% (60) = 540
+        // Frete (8kg * 2.00) = 16
+        // Total esperado = 556.00
+        configurarItensNoCarrinho(
+            criarItem(new BigDecimal("600.00"), new BigDecimal("8.0"), false, 1L)
+        );
+
+        BigDecimal total = compraService.calcularCustoTotal(carrinhoPadrao, Regiao.NORDESTE, TipoCliente.PRATA);
+
+        assertThat(total).isEqualByComparingTo("556.00");
+    }
 }
