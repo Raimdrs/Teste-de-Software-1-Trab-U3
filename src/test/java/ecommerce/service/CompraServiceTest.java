@@ -139,7 +139,6 @@ class CompraServiceTest extends CompraServiceBaseTest {
 
         assertThat(resultado.sucesso()).isTrue();
         
-        // VERIFICAÇÃO RIGOROSA (Mata mutantes das linhas 49 e 51)
         // Garante que o serviço extraiu o ID 10 e Qtd 2, e não 0L ou null
         verify(estoqueExternal).verificarDisponibilidade(eq(List.of(10L)), eq(List.of(2L)));
         verify(estoqueExternal).darBaixa(eq(List.of(10L)), eq(List.of(2L)));
@@ -200,7 +199,7 @@ class CompraServiceTest extends CompraServiceBaseTest {
 
         // 2. Arrange: Configura o Mock para RECUSAR o pagamento (autorizado = false)
         when(pagamentoExternal.autorizarPagamento(eq(1L), anyDouble()))
-            .thenReturn(new PagamentoDTO(false, null)); // <--- Isso aciona o 'if (!pagamento.autorizado())'
+            .thenReturn(new PagamentoDTO(false, null)); // aciona o 'if (!pagamento.autorizado())'
 
         // 3. Act & Assert: Verifica se a exceção é lançada
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -262,7 +261,7 @@ class CompraServiceTest extends CompraServiceBaseTest {
     }
 
 	// --------------------------------------------------------------------------
-    //  MATANDO MUTANTES QUE SOBRARAM
+    //  TENTANDO MATAR MUTANTES ADICIONAIS
     // --------------------------------------------------------------------------
 
 	@Test
@@ -292,8 +291,4 @@ class CompraServiceTest extends CompraServiceBaseTest {
 
         assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
     }
-
-	
-
-
 }
