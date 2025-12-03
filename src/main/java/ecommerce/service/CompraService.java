@@ -127,11 +127,10 @@ public class CompraService
 		}
 		// Faixa de A (0-5kg) está isenta de frete
 
-		// 4. Adicionar Taxa para Itens Frágeis (5 reais por item)
-		if (quantidadeFrageis > 0){
-			BigDecimal adicionalFragil = BigDecimal.valueOf(quantidadeFrageis).multiply(new BigDecimal("5.00"));
-			Valorfrete = Valorfrete.add(adicionalFragil);
-		}
+
+		BigDecimal adicionalFragil = BigDecimal.valueOf(quantidadeFrageis).multiply(new BigDecimal("5.00"));
+		Valorfrete = Valorfrete.add(adicionalFragil);
+		
 
 		//4. Total Final arrendodado
 		BigDecimal totalFinal = subtotalComDesconto.add(Valorfrete);

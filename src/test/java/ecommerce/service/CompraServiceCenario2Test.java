@@ -6,16 +6,11 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import ecommerce.dto.CompraDTO;
 import ecommerce.dto.DisponibilidadeDTO;
@@ -23,61 +18,46 @@ import ecommerce.dto.EstoqueBaixaDTO;
 import ecommerce.dto.PagamentoDTO;
 import ecommerce.entity.CarrinhoDeCompras;
 import ecommerce.entity.Cliente;
-import ecommerce.entity.ItemCompra;
-import ecommerce.entity.Produto;
-import ecommerce.entity.Regiao;
-import ecommerce.entity.TipoCliente;
-import ecommerce.external.IEstoqueExternal;
-import ecommerce.external.IPagamentoExternal;
 
-@ExtendWith(MockitoExtension.class)
-class CompraServiceCenario2Test {
+class CompraServiceCenario2Test extends CompraServiceBaseTest {
 
-    // Dependências internas implementadas com Fakes (Classes internas abaixo)
+    // Dependências internas implementadas com Fakes
     private FakeCarrinhoService carrinhoServiceFake;
     private FakeClienteService clienteServiceFake;
 
-    // Dependências externas mockadas com Mockito
-    @Mock
-    private IEstoqueExternal estoqueMock;
-
-    @Mock
-    private IPagamentoExternal pagamentoMock;
-
-    private CompraService compraService;
-
     @BeforeEach
-    void setup() {
-        // Inicializa os Fakes internos
-        carrinhoServiceFake = new FakeCarrinhoService(null); // Repositório nulo, pois é fake
-        clienteServiceFake = new FakeClienteService(null);   // Repositório nulo, pois é fake
+    @Override
+    public void setup() {
+        // 1. Setup da base (Mocks externos e dados)
+        super.setup();
 
-        // Injeta Fakes internos e Mocks externos
-        compraService = new CompraService(carrinhoServiceFake, clienteServiceFake, estoqueMock, pagamentoMock);
+        // 2. Fakes internos
+        carrinhoServiceFake = new FakeCarrinhoService(null);
+        clienteServiceFake = new FakeClienteService(null);
+
+        // 3. Sobrescreve o serviço com Fakes Internos e Mocks Externos (da Base)
+        compraService = new CompraService(carrinhoServiceFake, clienteServiceFake, estoqueExternal, pagamentoExternal);
     }
 
     @Test
     @DisplayName("Cenário 2: Sucesso total usando Mocks externos e Fakes de repositório")
     void finalizarCompra_Sucesso() {
-        // Arrange (Configurar Fake interno de Banco de Dados)
-        Cliente cliente = new Cliente(1L, "Maria Fake", Regiao.SUL, TipoCliente.PRATA);
-        Produto produto = new Produto(10L, "Celular", "Samsung", new BigDecimal("1500.00"), 
-                new BigDecimal("0.5"), BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, false, null);
-        ItemCompra item = new ItemCompra(1L, produto, 2L);
-        CarrinhoDeCompras carrinho = new CarrinhoDeCompras(1L, cliente, List.of(item), null);
+        // Arrange: Popula os "bancos de dados" dos fakes
+        // clientePadrao e carrinhoPadrao vêm da Base
+        clienteServiceFake.setClienteFake(clientePadrao);
+        carrinhoServiceFake.setCarrinhoFake(carrinhoPadrao);
 
-        // Popula os "bancos de dados" dos fakes
-        clienteServiceFake.setClienteFake(cliente);
-        carrinhoServiceFake.setCarrinhoFake(carrinho);
+        // Configura o carrinho com um item (usando helper da base)
+        configurarItensNoCarrinho(criarItem(java.math.BigDecimal.TEN, java.math.BigDecimal.ONE, false, 1L));
 
-        // Arrange (Configurar Mocks externos)
-        when(estoqueMock.verificarDisponibilidade(anyList(), anyList()))
+        // Arrange (Configurar Mocks externos herdados da Base)
+        when(estoqueExternal.verificarDisponibilidade(anyList(), anyList()))
                 .thenReturn(new DisponibilidadeDTO(true, Collections.emptyList()));
         
-        when(pagamentoMock.autorizarPagamento(eq(1L), anyDouble()))
+        when(pagamentoExternal.autorizarPagamento(eq(1L), anyDouble()))
                 .thenReturn(new PagamentoDTO(true, 999L));
         
-        when(estoqueMock.darBaixa(anyList(), anyList()))
+        when(estoqueExternal.darBaixa(anyList(), anyList()))
                 .thenReturn(new EstoqueBaixaDTO(true));
 
         // Act
@@ -89,10 +69,9 @@ class CompraServiceCenario2Test {
     }
 
     // -------------------------------------------------------------------------
-    // Implementações FAKE (Classes Internas para o Cenário 2)
+    // Implementações FAKE
     // -------------------------------------------------------------------------
 
-    // Fake estendendo a classe real para simular comportamento sem banco de dados
     static class FakeClienteService extends ClienteService {
         private Cliente clienteFake;
 
@@ -113,7 +92,6 @@ class CompraServiceCenario2Test {
         }
     }
 
-    // Fake estendendo a classe real para simular comportamento sem banco de dados
     static class FakeCarrinhoService extends CarrinhoDeComprasService {
         private CarrinhoDeCompras carrinhoFake;
 

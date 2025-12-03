@@ -3,8 +3,6 @@ package ecommerce.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,70 +10,46 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import ecommerce.dto.CompraDTO;
 import ecommerce.dto.DisponibilidadeDTO;
 import ecommerce.dto.EstoqueBaixaDTO;
 import ecommerce.dto.PagamentoDTO;
-import ecommerce.entity.CarrinhoDeCompras;
-import ecommerce.entity.Cliente;
-import ecommerce.entity.ItemCompra;
-import ecommerce.entity.Produto;
-import ecommerce.entity.Regiao;
-import ecommerce.entity.TipoCliente;
 import ecommerce.external.IEstoqueExternal;
 import ecommerce.external.IPagamentoExternal;
 
-@ExtendWith(MockitoExtension.class)
-class CompraServiceCenario1Test {
+class CompraServiceCenario1Test extends CompraServiceBaseTest {
 
-    // Dependências internas mockadas com Mockito
-    @Mock
-    private CarrinhoDeComprasService carrinhoService;
-
-    @Mock
-    private ClienteService clienteService;
-
-    // Dependências externas implementadas com Fakes (classes internas abaixo)
+    // Dependências externas implementadas com Fakes locais
     private FakeEstoque estoqueFake;
     private FakePagamento pagamentoFake;
 
-    private CompraService compraService;
-
-    private Cliente clientePadrao;
-    private CarrinhoDeCompras carrinhoPadrao;
-
     @BeforeEach
-    void setup() {
+    @Override
+    public void setup() {
+        // 1. Chama o setup da base para criar mocks e dados padrões
+        super.setup(); 
+
+        // 2. Inicializa os Fakes específicos deste cenário
         estoqueFake = new FakeEstoque();
         pagamentoFake = new FakePagamento();
 
-        // Injeta os Mocks e os Fakes manualmente no construtor
+        // 3. Sobrescreve o compraService injetando Mocks Internos (da Base) e Fakes Externos (Locais)
+        // carrinhoService e clienteService são herdados da Base
         compraService = new CompraService(carrinhoService, clienteService, estoqueFake, pagamentoFake);
-
-        // Configuração de dados comuns
-        clientePadrao = new Cliente(1L, "João Fake", Regiao.SUDESTE, TipoCliente.OURO);
-        
-        Produto produto = new Produto(1L, "Notebook", "Dell", new BigDecimal("3000.00"), 
-                new BigDecimal("2.0"), BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, false, null);
-        
-        ItemCompra item = new ItemCompra(1L, produto, 1L);
-        
-        carrinhoPadrao = new CarrinhoDeCompras(1L, clientePadrao, List.of(item), null);
     }
 
     @Test
     @DisplayName("Cenário 1: Sucesso total usando Fakes externos e Mocks internos")
     void finalizarCompra_Sucesso() {
-        // Arrange (Configurar Mocks)
+        // Arrange (Configurar Mocks internos herdados)
         when(clienteService.buscarPorId(1L)).thenReturn(clientePadrao);
         when(carrinhoService.buscarPorCarrinhoIdEClienteId(1L, clientePadrao)).thenReturn(carrinhoPadrao);
 
-        // Arrange (Configurar Fakes - estado inicial)
-        estoqueFake.adicionarDisponivel(1L); // Produto 1 está disponível
+        // Arrange (Configurar Fake de Estoque)
+        configurarItensNoCarrinho(criarItem(java.math.BigDecimal.TEN, java.math.BigDecimal.ONE, false, 1L));
+
+        estoqueFake.adicionarDisponivel(10L); // Produto 10 está disponível
         pagamentoFake.setAutorizarSempre(true);
 
         // Act
@@ -85,11 +59,11 @@ class CompraServiceCenario1Test {
         assertThat(resultado.sucesso()).isTrue();
         assertThat(resultado.mensagem()).contains("sucesso");
         // Verifica se o fake de estoque realmente registrou a baixa
-        assertThat(estoqueFake.getItensBaixados()).contains(1L);
+        assertThat(estoqueFake.getItensBaixados()).contains(10L);
     }
 
     // -------------------------------------------------------------------------
-    // Implementações FAKE (Classes Internas para o Cenário 1)
+    // Implementações FAKE (Classes Internas)
     // -------------------------------------------------------------------------
 
     static class FakeEstoque implements IEstoqueExternal {

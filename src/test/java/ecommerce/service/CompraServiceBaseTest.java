@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,6 +20,7 @@ import ecommerce.external.IPagamentoExternal;
 @ExtendWith(MockitoExtension.class)
 public class CompraServiceBaseTest {
 
+    // Dependências Mockadas (Padrão para a maioria dos testes)
     @Mock
     protected CarrinhoDeComprasService carrinhoService;
 
@@ -33,22 +33,25 @@ public class CompraServiceBaseTest {
     @Mock
     protected IPagamentoExternal pagamentoExternal;
 
-    @InjectMocks
+    // O serviço a ser testado
     protected CompraService compraService;
 
-    // Variáveis protegidas para serem acessadas pela classe de teste
+    // Dados comuns
     protected Cliente clientePadrao;
     protected CarrinhoDeCompras carrinhoPadrao;
 
     @BeforeEach
-    void setup() {
-        // Inicializa um Cliente válido antes de CADA teste
+    public void setup() {
+        // 1. Configuração de Dados Comuns
         clientePadrao = new Cliente(1L, "Cliente Teste", Regiao.SUL, TipoCliente.OURO);
 
-        // Inicializa um Carrinho básico (sem itens) antes de CADA teste
         carrinhoPadrao = new CarrinhoDeCompras();
         carrinhoPadrao.setId(1L);
         carrinhoPadrao.setCliente(clientePadrao);
+
+        // 2. Inicialização Padrão do Serviço (com Mocks)
+        // As subclasses que usam Fakes irão sobrescrever esta variável após chamar super.setup()
+        compraService = new CompraService(carrinhoService, clienteService, estoqueExternal, pagamentoExternal);
     }
 
     // --------------------------------------------------------------------------
