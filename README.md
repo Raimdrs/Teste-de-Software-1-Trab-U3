@@ -1,3 +1,13 @@
+# Trabalho da 3ª Unidade - Testes de Software
+
+Este projeto contém a implementação de testes de unidade, testes de mutação e uso de dublês de teste (Mocks e Fakes) para a funcionalidade de finalização de compra de um e-commerce.
+
+## 👥 Autores
+* **Raí de Medeiros Cunha**
+* **Rubens Matheus Venancio Melo Oliveira**
+
+---
+
 ## Pré-requisitos
 
 Para compilar o projeto e executar os testes, você precisará ter instalados em seu sistema:
