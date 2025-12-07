@@ -15,6 +15,40 @@ Para compilar o projeto e executar os testes, você precisará ter instalados em
 * Java JDK (versão 17 ou superior)
 * Apache Maven (versão 3.8 ou superior)
 
+## Cobertura de Testes do Projeto
+
+### **Cenário 1 — Uso predominante de FAKE**
+- `IEstoqueExternal` → Fake
+- `IPagamentoExternal` → Fake
+- `CarrinhoDeComprasService` e `ClienteService` → Mocks (Mockito)
+
+**Arquivo:** `CompraServiceCenario1Test.java`
+
+---
+
+### **Cenário 2 — Uso predominante de MOCK**
+- Serviços externos (`IEstoqueExternal` e `IPagamentoExternal`) → Mocks
+- Serviços de domínio (`ClienteService` e `CarrinhoDeComprasService`) → Fakes implementados manualmente
+
+**Arquivo:** `CompraServiceCenario2Test.java`
+
+---
+
+### **Testes Complementares**
+
+O arquivo `CompraServiceTest.java` contém:
+
+- Testes unitários completos do método `calcularCustoTotal`
+- Testes de todos os fluxos de `finalizarCompra()`:
+    - Estoque indisponível
+    - Pagamento não autorizado
+    - Falha na baixa de estoque + rollback
+    - Sucesso completo
+- Testes de borda para regras de frete
+- Testes usados para matar mutantes específicos do PIT
+
+---
+
 ## Como Executar a Aplicação
 
 Este projeto é uma aplicação Spring Boot. Para executá-la (iniciar o servidor):
@@ -44,9 +78,9 @@ O projeto utiliza o JaCoCo para verificar a cobertura estrutural do código (Bra
 
 Gere o relatório executando:
 
-Bash
-
-./mvnw clean verify
+```Bash
+mvn clean verify
+```
 Após a execução, abra o relatório no navegador:
 
 Caminho: target/site/jacoco/index.html

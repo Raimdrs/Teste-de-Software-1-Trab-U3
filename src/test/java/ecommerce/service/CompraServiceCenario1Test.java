@@ -27,14 +27,14 @@ class CompraServiceCenario1Test extends CompraServiceBaseTest {
     @BeforeEach
     @Override
     public void setup() {
-        // 1. Chama o setup da base para criar mocks e dados padrões
+        // Chama o setup da base para criar mocks e dados padrões
         super.setup(); 
 
-        // 2. Inicializa os Fakes específicos deste cenário
+        // Inicializa os Fakes
         estoqueFake = new FakeEstoque();
         pagamentoFake = new FakePagamento();
 
-        // 3. Sobrescreve o compraService injetando Mocks Internos (da Base) e Fakes Externos (Locais)
+        // Sobrescreve o compraService injetando Mocks Internos (da Base) e Fakes Externos (Locais)
         // carrinhoService e clienteService são herdados da Base
         compraService = new CompraService(carrinhoService, clienteService, estoqueFake, pagamentoFake);
     }

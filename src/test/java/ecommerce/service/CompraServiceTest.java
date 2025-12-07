@@ -27,7 +27,7 @@ import ecommerce.entity.TipoCliente;
 class CompraServiceTest extends CompraServiceBaseTest {
 
     // --------------------------------------------------------------------------
-    // PARTE 1: TESTES DO MÉTODO calcularCustoTotal
+    // TESTES DO MÉTODO calcularCustoTotal
     // --------------------------------------------------------------------------
 
     @Test
@@ -37,7 +37,7 @@ class CompraServiceTest extends CompraServiceBaseTest {
 
         BigDecimal total = compraService.calcularCustoTotal(carrinhoPadrao, Regiao.SUL, TipoCliente.OURO);
 
-        // Usar isEqualTo obriga que seja BigDecimal.ZERO estrito (escala 0)
+        // Usamos isEqualTo para obrigar que seja BigDecimal.ZERO estrito (escala 0)
         // Se o código cair no cálculo final, virá 0.00 (escala 2) e o teste falhará, matando o mutante.
         assertThat(total).isEqualTo(BigDecimal.ZERO);
     }
@@ -55,7 +55,7 @@ class CompraServiceTest extends CompraServiceBaseTest {
     }
 
     @Test
-    @DisplayName("Desconto 10% (> 500 e < 1000) e Frete Faixa B (> 5kg e <= 10kg)")
+    @DisplayName("Desconto 10% (>= 500 e < 1000) e Frete Faixa B (> 5kg e <= 10kg)")
     void calcularCustoTotal_Desconto10_FreteFaixaB() {
         // Subtotal 600 - 10% (60) = 540
         // Frete (8kg * 2.00) = 16
@@ -70,22 +70,15 @@ class CompraServiceTest extends CompraServiceBaseTest {
     }
 
     @Test
-    @DisplayName("Teste Limite 500: Exatamente R$ 500,00 não deve ter desconto")
-    void calcularCustoTotal_Limite500_SemDesconto() {
+    @DisplayName("Teste Limite 500: Exatamente R$ 500,00 deve ter 10% de desconto")
+    void calcularCustoTotal_Limite500_ComDesconto() {
         configurarItensNoCarrinho(
             criarItem(new BigDecimal("100.00"), new BigDecimal("0.2"), false, 5L)
         );
 
         BigDecimal total = compraService.calcularCustoTotal(carrinhoPadrao, Regiao.NORDESTE, TipoCliente.PRATA);
 
-        assertThat(total).isEqualByComparingTo("450.00"); // 500.00 - 10% (50) = 450.00?
-        // ATENÇÃO: Se a regra for "> 500", 500 exato NÃO tem desconto. O total seria 500.00.
-        // Se o seu código estiver corrigido para `> 500` (e não `>=`), o assert abaixo deve ser "500.00".
-        // Vou assumir que o código está correto (sem desconto para 500 exato):
-        // assertThat(total).isEqualByComparingTo("500.00"); 
-        
-        // Se o seu teste espera 450.00, significa que você implementou `>= 500`. 
-        // O enunciado pede "> 500". Verifique sua implementação.
+        assertThat(total).isEqualByComparingTo("450.00");
     }
 
     @Test
@@ -120,7 +113,7 @@ class CompraServiceTest extends CompraServiceBaseTest {
     }
 
     // --------------------------------------------------------------------------
-    // PARTE 2: TESTES DO MÉTODO finalizarCompra
+    // TESTES DO MÉTODO finalizarCompra
     // --------------------------------------------------------------------------
 
     @Test
@@ -254,7 +247,7 @@ class CompraServiceTest extends CompraServiceBaseTest {
     }
 
     @Test
-    @DisplayName("Matar Mutante Linha 99: Peso deve ser multiplicado pela quantidade")
+    @DisplayName("Matar Mutante: Peso deve ser multiplicado pela quantidade")
     void calcularCustoTotal_QuantidadeMaiorQueUm() {
         // Peso 10kg, Qtd 2 = 20kg Total (Faixa C).
         // Se fosse divisão, daria 5kg (Faixa A).

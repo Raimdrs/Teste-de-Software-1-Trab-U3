@@ -28,14 +28,14 @@ class CompraServiceCenario2Test extends CompraServiceBaseTest {
     @BeforeEach
     @Override
     public void setup() {
-        // 1. Setup da base (Mocks externos e dados)
+        // Setup da base (Mocks externos e dados)
         super.setup();
 
-        // 2. Fakes internos
+        // Fakes internos
         carrinhoServiceFake = new FakeCarrinhoService(null);
         clienteServiceFake = new FakeClienteService(null);
 
-        // 3. Sobrescreve o serviço com Fakes Internos e Mocks Externos (da Base)
+        // Sobrescreve o serviço com Fakes Internos e Mocks Externos (da Base)
         compraService = new CompraService(carrinhoServiceFake, clienteServiceFake, estoqueExternal, pagamentoExternal);
     }
 
